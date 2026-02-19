@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  allowedHosts: ['amusing-integrity-production.up.railway.app']
+  server.allowedHosts: ['amusing-integrity-production.up.railway.app']
 })
