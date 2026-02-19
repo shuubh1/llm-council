@@ -16,7 +16,6 @@ COUNCIL_MODELS = [
     "x-ai/grok-4",
 ]
 
-# Chairman model - synthesizes final response
 CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
 
 # OpenRouter API endpoint
