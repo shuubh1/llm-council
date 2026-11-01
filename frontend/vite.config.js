@@ -12,6 +12,8 @@ export default defineConfig({
       },
     },
     allowedHosts: [
+      'fatcataiconsulting.tech',
+      'www.fatcataiconsulting.tech',
       'amusing-integrity-production.up.railway.app',
       'localhost',
       '127.0.0.1',
