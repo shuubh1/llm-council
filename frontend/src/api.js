@@ -2,7 +2,7 @@
  * API client for the LLM Council backend.
  */
 
-const API_BASE = 'https://llm-council-env.up.railway.app';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
 
 export const api = {
   /**
@@ -11,7 +11,7 @@ export const api = {
   async listConversations() {
     const response = await fetch(`${API_BASE}/api/conversations`);
     if (!response.ok) {
-      throw new Error('Failed to list conversations');
+      throw new Error(`Failed to list conversations: ${response.status} ${response.statusText}`);
     }
     return response.json();
   },
@@ -28,7 +28,7 @@ export const api = {
       body: JSON.stringify({}),
     });
     if (!response.ok) {
-      throw new Error('Failed to create conversation');
+      throw new Error(`Failed to create conversation: ${response.status} ${response.statusText}`);
     }
     return response.json();
   },
@@ -41,7 +41,7 @@ export const api = {
       `${API_BASE}/api/conversations/${conversationId}`
     );
     if (!response.ok) {
-      throw new Error('Failed to get conversation');
+      throw new Error(`Failed to get conversation: ${response.status} ${response.statusText}`);
     }
     return response.json();
   },
@@ -61,7 +61,7 @@ export const api = {
       }
     );
     if (!response.ok) {
-      throw new Error('Failed to send message');
+      throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
     }
     return response.json();
   },
@@ -86,7 +86,7 @@ export const api = {
     );
 
     if (!response.ok) {
-      throw new Error('Failed to send message');
+      throw new Error(`Failed to stream message: ${response.status} ${response.statusText}`);
     }
 
     const reader = response.body.getReader();

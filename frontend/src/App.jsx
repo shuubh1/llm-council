@@ -9,6 +9,7 @@ function App() {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Load conversations on mount
   useEffect(() => {
@@ -24,32 +25,46 @@ function App() {
 
   const loadConversations = async () => {
     try {
+      setError(null);
       const convs = await api.listConversations();
       setConversations(convs);
-    } catch (error) {
-      console.error('Failed to load conversations:', error);
+
+      // Auto-select latest conversation or create one if none exist
+      if (convs.length > 0) {
+        setCurrentConversationId((prev) => prev || convs[0].id);
+      } else {
+        await handleNewConversation();
+      }
+    } catch (err) {
+      console.error('Failed to load conversations:', err);
+      setError('Unable to connect to backend server. Make sure it is running on http://localhost:8001.');
     }
   };
 
   const loadConversation = async (id) => {
     try {
+      setError(null);
       const conv = await api.getConversation(id);
       setCurrentConversation(conv);
-    } catch (error) {
-      console.error('Failed to load conversation:', error);
+    } catch (err) {
+      console.error('Failed to load conversation:', err);
+      setError('Failed to load conversation details.');
     }
   };
 
   const handleNewConversation = async () => {
     try {
+      setError(null);
       const newConv = await api.createConversation();
-      setConversations([
-        { id: newConv.id, created_at: newConv.created_at, message_count: 0 },
-        ...conversations,
+      setConversations((prev) => [
+        { id: newConv.id, created_at: newConv.created_at, message_count: 0, title: 'New Conversation' },
+        ...prev,
       ]);
       setCurrentConversationId(newConv.id);
-    } catch (error) {
-      console.error('Failed to create conversation:', error);
+      setCurrentConversation(newConv);
+    } catch (err) {
+      console.error('Failed to create conversation:', err);
+      setError('Failed to create a new conversation. Make sure backend is running.');
     }
   };
 
@@ -61,6 +76,7 @@ function App() {
     if (!currentConversationId) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       // Optimistically add user message to UI
       const userMessage = { role: 'user', content };
@@ -163,6 +179,7 @@ function App() {
 
           case 'error':
             console.error('Stream error:', event.message);
+            setError(`Deliberation error: ${event.message}`);
             setIsLoading(false);
             break;
 
@@ -170,8 +187,9 @@ function App() {
             console.log('Unknown event type:', eventType);
         }
       });
-    } catch (error) {
-      console.error('Failed to send message:', error);
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      setError(`Failed to send message: ${err.message}`);
       // Remove optimistic messages on error
       setCurrentConversation((prev) => ({
         ...prev,
@@ -189,11 +207,22 @@ function App() {
         onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewConversation}
       />
-      <ChatInterface
-        conversation={currentConversation}
-        onSendMessage={handleSendMessage}
-        isLoading={isLoading}
-      />
+      <div className="main-content-wrapper">
+        {error && (
+          <div className="error-banner">
+            <span>{error}</span>
+            <button className="retry-btn" onClick={loadConversations}>
+              Retry Connection
+            </button>
+          </div>
+        )}
+        <ChatInterface
+          conversation={currentConversation}
+          onSendMessage={handleSendMessage}
+          onNewConversation={handleNewConversation}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 }

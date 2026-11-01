@@ -274,10 +274,14 @@ Title:"""
 
     messages = [{"role": "user", "content": title_prompt}]
 
-    # Use gemini-2.5-flash for title generation (fast and cheap)
-    response = await query_model("google/gemini-2.5-flash", messages, timeout=30.0)
+    # Use gemini-2.5-flash for title generation with max_tokens (fast and cheap)
+    response = await query_model("google/gemini-2.5-flash", messages, timeout=30.0, max_tokens=50)
 
-    if response is None:
+    # Fallback to lightning model if gemini fails
+    if response is None or not response.get('content'):
+        response = await query_model("nvidia/nemotron-3.5-lightning:free", messages, timeout=30.0, max_tokens=50)
+
+    if response is None or not response.get('content'):
         # Fallback to a generic title
         return "New Conversation"
 

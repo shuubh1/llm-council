@@ -8,6 +8,7 @@ import './ChatInterface.css';
 export default function ChatInterface({
   conversation,
   onSendMessage,
+  onNewConversation,
   isLoading,
 }) {
   const [input, setInput] = useState('');
@@ -43,6 +44,11 @@ export default function ChatInterface({
         <div className="empty-state">
           <h2>Welcome to LLM Council</h2>
           <p>Create a new conversation to get started</p>
+          {onNewConversation && (
+            <button className="cta-button" onClick={onNewConversation}>
+              + Start New Deliberation
+            </button>
+          )}
         </div>
       </div>
     );
@@ -53,7 +59,7 @@ export default function ChatInterface({
       <div className="messages-container">
         {conversation.messages.length === 0 ? (
           <div className="empty-state">
-            <h2>Start a conversation</h2>
+            <h2>Start a Deliberation</h2>
             <p>Ask a question to consult the LLM Council</p>
           </div>
         ) : (
@@ -114,6 +120,14 @@ export default function ChatInterface({
           <div className="loading-indicator">
             <div className="spinner"></div>
             <span>Consulting the council...</span>
+          </div>
+        )}
+
+        {!isLoading && conversation.messages.length > 0 && (
+          <div className="deliberation-footer">
+            <button className="new-deliberation-cta" onClick={onNewConversation}>
+              + Start a New Deliberation
+            </button>
           </div>
         )}
 

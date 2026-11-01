@@ -2,7 +2,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #ffffff;
 }
 
@@ -20,6 +20,7 @@
   height: 100%;
   color: #666;
   text-align: center;
+  padding: 40px;
 }
 
 .empty-state h2 {
@@ -29,8 +30,47 @@
 }
 
 .empty-state p {
-  margin: 0;
+  margin: 0 0 20px 0;
   font-size: 16px;
+}
+
+.cta-button {
+  padding: 12px 24px;
+  background: #4a90e2;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cta-button:hover {
+  background: #357abd;
+}
+
+.deliberation-footer {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 16px;
+}
+
+.new-deliberation-cta {
+  padding: 12px 24px;
+  background: #f0f7ff;
+  color: #4a90e2;
+  border: 1px solid #b3d7ff;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.new-deliberation-cta:hover {
+  background: #4a90e2;
+  color: #ffffff;
 }
 
 .message-group {

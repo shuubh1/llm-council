@@ -8,7 +8,8 @@ from .config import OPENROUTER_API_KEY, OPENROUTER_API_URL
 async def query_model(
     model: str,
     messages: List[Dict[str, str]],
-    timeout: float = 120.0
+    timeout: float = 120.0,
+    max_tokens: Optional[int] = None
 ) -> Optional[Dict[str, Any]]:
     """
     Query a single model via OpenRouter API.
@@ -17,6 +18,7 @@ async def query_model(
         model: OpenRouter model identifier (e.g., "openai/gpt-4o")
         messages: List of message dicts with 'role' and 'content'
         timeout: Request timeout in seconds
+        max_tokens: Optional maximum tokens to generate
 
     Returns:
         Response dict with 'content' and optional 'reasoning_details', or None if failed
@@ -26,10 +28,13 @@ async def query_model(
         "Content-Type": "application/json",
     }
 
-    payload = {
+    payload: Dict[str, Any] = {
         "model": model,
         "messages": messages,
     }
+
+    if max_tokens is not None:
+        payload["max_tokens"] = max_tokens
 
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -42,10 +47,14 @@ async def query_model(
 
             data = response.json()
             message = data['choices'][0]['message']
+            content = message.get('content')
+            # If content is empty or None, fallback to reasoning text if provided
+            if not content and message.get('reasoning'):
+                content = message.get('reasoning')
 
             return {
-                'content': message.get('content'),
-                'reasoning_details': message.get('reasoning_details')
+                'content': content,
+                'reasoning_details': message.get('reasoning_details') or message.get('reasoning')
             }
 
     except Exception as e:
@@ -55,7 +64,8 @@ async def query_model(
 
 async def query_models_parallel(
     models: List[str],
-    messages: List[Dict[str, str]]
+    messages: List[Dict[str, str]],
+    max_tokens: Optional[int] = None
 ) -> Dict[str, Optional[Dict[str, Any]]]:
     """
     Query multiple models in parallel.
@@ -63,6 +73,7 @@ async def query_models_parallel(
     Args:
         models: List of OpenRouter model identifiers
         messages: List of message dicts to send to each model
+        max_tokens: Optional maximum tokens to generate
 
     Returns:
         Dict mapping model identifier to response dict (or None if failed)
@@ -70,7 +81,7 @@ async def query_models_parallel(
     import asyncio
 
     # Create tasks for all models
-    tasks = [query_model(model, messages) for model in models]
+    tasks = [query_model(model, messages, max_tokens=max_tokens) for model in models]
 
     # Wait for all to complete
     responses = await asyncio.gather(*tasks)
